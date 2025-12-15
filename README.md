@@ -22,7 +22,7 @@ Claude Code collapses thinking blocks by default, showing only:
 
 You have to press `ctrl+o` every time to see the actual thinking content. This patch makes thinking blocks visible inline automatically.
 
-**Current Version:** Claude Code 2.0.62 (Updated 2025-12-09)
+**Current Version:** Claude Code 2.0.69 (Updated 2025-12-15)
 
 ## Quick Start
 
@@ -108,6 +108,7 @@ function GkQ({streamMode:A}){return null}
 - v2.0.59: Renamed to `DO2`, uses `MP.createElement`, `CRA.useState`
 - v2.0.61: Renamed to `RR2`, uses `rj.createElement`, `vTA.useState`, `P` container
 - v2.0.62: Renamed to `ZT2`, uses `GP.createElement`, `rTA.useState`, `P` container
+- v2.0.69: Renamed to `KnB`, uses `GT.createElement`, `hLA.useState`, `j` container, `z` text component
 
 ### Patch 2: Force Thinking Visibility (v2.0.46)
 **Before:**
@@ -153,11 +154,12 @@ case"thinking":
 - v2.0.59: Changed to `F89` component, `u3` variable, checks `K` and `G`
 - v2.0.61: Changed to `T69` component, `A3` variable, checks `F` and `G`
 - v2.0.62: Changed to `X59` component, `J3` variable, checks `F` and `G`
+- v2.0.69: Changed to `sU2` component, `n8` variable, checks `E` and `G`
 
 ## Installation
 
 ### Prerequisites
-- Claude Code v2.0.62 installed
+- Claude Code v2.0.69 installed
 - Node.js (comes with Claude Code installation)
 
 ### Install Steps
@@ -265,18 +267,18 @@ Then restart Claude Code.
 
 ## Verification
 
-Check if patches are applied (for v2.0.62):
+Check if patches are applied (for v2.0.69):
 
 ```bash
-# Check ZT2 patch
-grep -n "function ZT2" ~/.claude/local/node_modules/@anthropic-ai/claude-code/cli.js
+# Check KnB patch
+grep -n "function KnB" ~/.claude/local/node_modules/@anthropic-ai/claude-code/cli.js
 
-# Should show: function ZT2({streamMode:A}){return null}
+# Should show: function KnB({streamMode:A}){return null}
 
 # Check thinking visibility patch
-grep -n 'case"thinking":return J3.createElement(X59' ~/.claude/local/node_modules/@anthropic-ai/claude-code/cli.js
+grep -n 'case"thinking":return n8.createElement(sU2' ~/.claude/local/node_modules/@anthropic-ai/claude-code/cli.js
 
-# Should show: case"thinking":return J3.createElement(X59,{addMargin:Q,param:A,isTranscriptMode:!0,verbose:G});
+# Should show: case"thinking":return n8.createElement(sU2,{addMargin:Q,param:A,isTranscriptMode:!0,verbose:G});
 ```
 
 ## Troubleshooting
@@ -380,8 +382,8 @@ The script automatically works with all Node.js version managers:
 ## Technical Details
 
 ### File Structure
-- **cli.js:** ~3,600+ lines, ~9+ MB (heavily minified)
-- **Version:** Claude Code 2.0.46
+- **cli.js:** ~3,600+ lines, ~10+ MB (heavily minified)
+- **Version:** Claude Code 2.0.69
 - **Patches:** Non-invasive, minimal changes
 
 ### Installation Detection System
@@ -411,11 +413,11 @@ $(which claude) → resolve symlinks → find cli.js
 
 ### Why Two Patches?
 
-1. **ZT2 Function:** Controls the UI banner shown after thinking completes
+1. **KnB Function:** Controls the UI banner shown after thinking completes
 2. **Thinking Renderer:** Controls whether the actual thinking text is displayed
 
 Both must be patched because they're separate systems:
-- Patching only ZT2 → Blank line appears where thinking should be
+- Patching only KnB → Blank line appears where thinking should be
 - Patching only the renderer → Banner still shows "ctrl+o to show"
 
 ### Pattern Evolution Across Versions
@@ -452,6 +454,7 @@ The minified code patterns change with each Claude Code update:
 | 2.0.59  | `DO2`          | `F89`     | `K,G` check |
 | 2.0.61  | `RR2`          | `T69`     | `F,G` check |
 | 2.0.62  | `ZT2`          | `X59`     | `F,G` check |
+| 2.0.69  | `KnB`          | `sU2`     | `E,G` check |
 
 When Claude Code updates, function names and component identifiers are regenerated during minification. In some cases (like v2.0.29), the patterns remain unchanged.
 
@@ -460,7 +463,7 @@ When Claude Code updates, function names and component identifiers are regenerat
 1. **Breaks on updates:** Must re-run after `claude update`
 2. **Minified code:** Fragile, patterns may change with version updates
 3. **No official config:** This is a workaround until Anthropic adds a native setting
-4. **Version-specific:** Patterns are specific to v2.0.62
+4. **Version-specific:** Patterns are specific to v2.0.69
 
 ## Feature Request
 
@@ -497,9 +500,9 @@ Configure which AI models Claude Code uses for different subagent types (Plan, E
 ### The Problem
 
 By default, Claude Code hardcodes the models used by subagents:
-- **Plan subagent**: Uses Sonnet (for planning tasks)
+- **Plan subagent**: Uses "inherit" (inherits from main loop model)
 - **Explore subagent**: Uses Haiku (for code exploration)
-- **general-purpose subagent**: Inherits from main loop model
+- **general-purpose subagent**: Uses Sonnet
 
 You cannot change these defaults without modifying the source code.
 
@@ -507,7 +510,7 @@ You cannot change these defaults without modifying the source code.
 
 This patch allows you to configure subagent models via a configuration file (`~/.claude/subagent-models.json`).
 
-**Current Version:** Claude Code 2.0.46
+**Current Version:** Claude Code 2.0.69
 
 ### Quick Start
 
@@ -569,22 +572,28 @@ node patch-subagent-models.js --help
 
 The patch modifies Claude Code's `cli.js` to change the hardcoded model assignments:
 
-**Before (v2.0.37):**
+**Before (v2.0.69):**
 ```javascript
-// Plan subagent
-R3A={agentType:"Plan",...,model:"sonnet"}
+// Plan subagent (JJA)
+JJA={agentType:"Plan",...,model:"inherit"}
 
-// Explore subagent
-model:"haiku"}});var R3A;
+// Explore subagent (uw)
+uw={agentType:"Explore",...,model:"haiku"}
+
+// general-purpose subagent (MB1)
+MB1={agentType:"general-purpose",...,model:"sonnet"}
 ```
 
-**After (with config: Plan="haiku", Explore="sonnet"):**
+**After (with config: Plan="sonnet", Explore="sonnet", general-purpose="opus"):**
 ```javascript
 // Plan subagent
-R3A={agentType:"Plan",...,model:"haiku"}
+JJA={agentType:"Plan",...,model:"sonnet"}
 
 // Explore subagent
-model:"sonnet"}});var R3A;
+uw={agentType:"Explore",...,model:"sonnet"}
+
+// general-purpose subagent
+MB1={agentType:"general-purpose",...,model:"opus"}
 ```
 
 ### Important Notes
@@ -599,7 +608,7 @@ model:"sonnet"}});var R3A;
    ~/.claude/local/node_modules/@anthropic-ai/claude-code/cli.js.subagent-models.backup
    ```
 
-3. **Version-Specific:** Patterns are specific to v2.0.37. May need updates for newer versions.
+3. **Version-Specific:** Patterns are specific to v2.0.69. May need updates for newer versions.
 
 ### Restoration
 
@@ -660,11 +669,12 @@ cp ~/.claude/local/node_modules/@anthropic-ai/claude-code/cli.js.subagent-models
 
 ### Version History
 
-| Version | Plan Default | Explore Default | Notes |
-|---------|-------------|-----------------|-------|
-| 2.0.31  | sonnet      | haiku           | Previous |
-| 2.0.32  | sonnet      | haiku           | Previous |
-| 2.0.37  | sonnet      | haiku           | Current |
+| Version | Plan Default | Explore Default | general-purpose Default | Notes |
+|---------|-------------|-----------------|------------------------|-------|
+| 2.0.31  | sonnet      | haiku           | (inherited)            | Previous |
+| 2.0.32  | sonnet      | haiku           | (inherited)            | Previous |
+| 2.0.37  | sonnet      | haiku           | (inherited)            | Previous |
+| 2.0.69  | inherit     | haiku           | sonnet                 | Current |
 
 ---
 
@@ -678,8 +688,8 @@ Developed through analysis of Claude Code's compiled JavaScript. Special thanks 
 
 ---
 
-**Last Updated:** 2025-12-09
-**Claude Code Version:** 2.0.62
+**Last Updated:** 2025-12-15
+**Claude Code Version:** 2.0.69
 **Status:** ✅ Working
 
 ### Quick Reference
